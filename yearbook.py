@@ -40,7 +40,7 @@ def readDatabase():
     if row is None:
         print("Empty people table")
     while row is not None:
-        print(row[0], row[1], row[2])
+        print(row[0], row[1], row[2], row[3], row[4], row[5], row[6])
         row = cursor.fetchone()
 
     cursor.close()
@@ -91,15 +91,35 @@ def getData():
         link_dict[name] = link
 
         browser.get(link)
-        time.sleep(1)
+        time.sleep(2)
         browser.get_screenshot_as_file(name + ".png")
-
-        insertData(name, house, "", "", "", "")
 
         #at the moment I'm trying to work out how to get the text from these divs, I think a loop would work?
         person_soup = BeautifulSoup(browser.page_source, "html.parser")
-        nicknames = person_soup.find_all("div", attrs={"class": "profile-detail-value"})
-        print("Nickname(s): " + str(nicknames))
+        details = person_soup.find_all("div", attrs={"class": "profile-detail-value"})
+        print("Details: " + str(details))
+        
+        counter2 = 1
+        for i in details:
+            if counter2 == 1:
+                nicknames = i.get_text()
+                print("Nickname(s): " + nicknames)
+                counter2 += 1
+            elif counter2 == 2:
+                email = i.get_text()
+                print("Email: " + email)
+                counter2 += 1
+            elif counter2 == 3:
+                birthday = i.get_text()
+                print("Birthday: " + birthday)
+                counter2 += 1
+            elif counter2 == 4:
+                subjects = i.get_text()
+                print("Subjects: " + subjects)
+                counter2 += 1
+        counter2 = 1
+
+        insertData(name, house, nicknames, email, birthday, subjects)
 
 
         if counter > 10:
