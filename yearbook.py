@@ -64,6 +64,8 @@ def getData():
     time.sleep(3)
 
     browser.get("https://yearbook.com/s/people/list")
+    
+    time.sleep(2)
 
     html_soup = BeautifulSoup(browser.page_source,'html.parser')
 
@@ -71,6 +73,7 @@ def getData():
 
     counter = 1
     link_dict = {}
+    original_dir = os.getcwd()
     if not os.path.exists("Screenshots"):
             os.makedirs("Screenshots")
     os.chdir("Screenshots")
@@ -91,10 +94,9 @@ def getData():
         link_dict[name] = link
 
         browser.get(link)
-        time.sleep(2)
+        time.sleep(5)
         browser.get_screenshot_as_file(name + ".png")
-
-        #at the moment I'm trying to work out how to get the text from these divs, I think a loop would work?
+        '''
         person_soup = BeautifulSoup(browser.page_source, "html.parser")
         details = person_soup.find_all("div", attrs={"class": "profile-detail-value"})
         print("Details: " + str(details))
@@ -119,12 +121,30 @@ def getData():
                 counter2 += 1
         counter2 = 1
 
-        insertData(name, house, nicknames, email, birthday, subjects)
+        #inserts the data into the MySQL database, disabled for testing
+        #insertData(name, house, nicknames, email, birthday, subjects)
 
+        friends_say = person_soup.find_all("textarea")
+        print(str(friends_say))
+        
+        for i in friends_say:
+            print(str(i.get_text()))
+        '''
+        os.chdir(original_dir)
 
-        if counter > 10:
-            break
+        if not os.path.exists("Pages"):
+            os.makedirs("Pages")
 
+        with open(os.getcwd() + "\\" + os.path.join("Pages", name) + ".html", mode="w") as page:
+            html_not_encoded = browser.page_source
+            html_encoded = html_not_encoded.encode("utf8")
+            page.write(str(html_encoded))
+
+        #stops after 10 people for testing
+        #if counter > 10:
+        #   break
+
+    #will quit the browser after scraping, disabled for testing
     #browser.quit()
 
 readDatabase()
